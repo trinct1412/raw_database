@@ -1,0 +1,23 @@
+version: "3.3"
+
+services:
+  db:
+    image: postgres:latest
+    volumes:
+#      - .docker/pgdata:/var/lib/postgresql/data
+      - ./dump_table:/docker-entrypoint-initdb.d
+    environment:
+      - POSTGRES_DB=test_db
+      - POSTGRES_USER=root123
+      - POSTGRES_PASSWORD=root123
+      - POSTGRES_PORT=5432
+    ports:
+      - "5435:5432"
+    networks:
+      - database
+    expose:
+      - "5435"
+
+networks:
+  database:
+    driver: bridge
