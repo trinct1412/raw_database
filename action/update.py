@@ -26,8 +26,8 @@ class Update(BaseDatabase):
            SET
                {self.__raw_modifies}
         """
-        query += f""" WHERE {self.__raw_conditions} """ if self.__raw_conditions else query
-        query += f""" RETURNING {self.__returning} """ if self.__returning else query
+        query = query + f""" WHERE {self.__raw_conditions} """ if self.__raw_conditions else query
+        query = query + f""" RETURNING {self.__returning} """ if self.__returning else query
         return text(query)
 
     def set(self, **modifies):
@@ -48,15 +48,21 @@ class Update(BaseDatabase):
         self.__returning = key
         return self
 
+    def execute(self):
+        parameters = {**self.__modifies, **self.__conditions}
+        raw_sql = self.__get_raw_sql()
+        result = self.connection.execute(raw_sql, parameters)
+        if self.is_commit:
+            self.connection.commit()
+        return result
+
     def __getattr__(self, method_name):
         def execute():
             raw_sql = self.__get_raw_sql()
             parameters = {**self.__modifies, **self.__conditions}
+            result = self.execute()
             if os.getenv("IS_SHOW_SQL", False):
                 self._show_query(raw_sql, parameters)
-            result = self.connection.execute(raw_sql, parameters)
-            if self.is_commit:
-                self.connection.commit()
             return getattr(result, method_name)()
 
         return execute

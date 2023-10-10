@@ -38,14 +38,22 @@ class Insert(BaseDatabase):
         self.__returning = key
         return self
 
+    def execute(self):
+        result = self.connection.execute(self.__get_raw_sql(), self.__data)
+        if self.is_commit:
+            self.connection.commit()
+        return result
+
     def __getattr__(self, method_name):
         def execute():
             raw_sql = self.__get_raw_sql()
+            result = self.execute()
+
+            if method_name == 'execute':
+                return result
+
             if os.getenv("IS_SHOW_SQL", False):
                 self._show_query(raw_sql, self.__data)
-            result = self.connection.execute(self.__get_raw_sql(), self.__data)
-            if self.is_commit:
-                self.connection.commit()
             return getattr(result, method_name)()
 
         return execute

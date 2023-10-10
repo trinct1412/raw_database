@@ -22,7 +22,10 @@ if __name__ == '__main__':
     g = QuerySet(connection_).select("password", "COUNT(*) AS same_password").from_("accounts").where(
         user_id__in=(1, 2, 3, 4)).group_by("password").fetchall()
 
-    i = Insert(connection_, is_commit=False).into("accounts").values(user_id=6, username="Tom B", password="test password",
-                                                                    email="test email").returning("user_id").fetchone()
-    j = Update(connection_, is_commit=False)(table="accounts").set(email="test email update", username="test username update").where(
-        user_id=1).returning("user_id").fetchone()
+    # i = Insert(connection_, is_commit=False).into("accounts").values(user_id=8, username="Tomd B", password="test password",
+    #                                                                 email="test email a").returning("user_id").fetchone()
+    Insert(connection_, is_commit=True).into("accounts").values(user_id=8, username="Tomd B", password="test password").execute()
+    # j = Update(connection_, is_commit=True)(table="accounts").set(email="test email update5", username="test u1sername updat1e").where(
+    #     user_id=2).returning("user_id").fetchone()
+    Update(connection_, is_commit=True)(table="accounts").set(email="test email update5", username="test u1sername updat1e").where(
+        user_id=2).execute()
